@@ -16,12 +16,12 @@ export default function Navigation({ onAboutClick }: NavigationProps) {
           >
             📜 About the Academy
           </button>
-          <a href="#" className="font-cinzel text-lg magical-hover golden-underline hidden">
+          <a href="/admin" className="font-cinzel text-lg magical-hover golden-underline">
             🔑 Admin Dashboard
           </a>
         </div>
         <div>
-          <a href="#" className="font-cinzel text-lg magical-hover golden-underline">
+          <a href="/parent-portal" className="font-cinzel text-lg magical-hover golden-underline">
             👪 Parent Portal
           </a>
         </div>

@@ -4,8 +4,11 @@ interface PathwaySelectionProps {
 
 export default function PathwaySelection({ onReturn }: PathwaySelectionProps) {
   const handlePathwaySelect = (pathType: 'children' | 'adults') => {
-    console.log(`Selected path: ${pathType}`);
-    // TODO: Navigate to respective learning interface
+    if (pathType === 'children') {
+      window.location.href = '/seven-realms';
+    } else {
+      window.location.href = '/returning-path';
+    }
   };
 
   return (
