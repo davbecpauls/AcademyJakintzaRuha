@@ -32,9 +32,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   app.get("/api/health", async (_req, res) => {
     try {
-      // ping DB if available
-  if (db) await db.execute(dsql`select 1`);
-      res.json({ ok: true, db: Boolean(db) });
+      let dbStatus = false;
+      let errorMsg = undefined;
+      if (db) {
+        try {
+          await db.execute(dsql`select 1`);
+          dbStatus = true;
+        } catch (err: any) {
+          errorMsg = err?.message || String(err);
+        }
+      }
+      res.json({ ok: true, db: dbStatus, error: errorMsg });
     } catch (e: any) {
       res.status(500).json({ ok: false, message: e?.message || "health check failed" });
     }
