@@ -1,10 +1,50 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import fs from "fs";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Minimal CORS for Render backend; set CORS_ORIGIN to your Netlify URL (comma-separated allowed)
+app.use((req, res, next) => {
+  const allowed = (process.env.CORS_ORIGIN || "").split(/[,\s]+/).filter(Boolean);
+  const origin = req.headers.origin as string | undefined;
+
+  const isAllowedOrigin = (o?: string) => {
+    if (!o || allowed.length === 0) return false;
+    return allowed.some((pattern) => {
+      if (pattern === o) return true; // exact match
+      if (pattern.includes("*")) {
+        // convert wildcard to regex, escape dots
+        const esc = pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\\\*/g, ".*");
+        const re = new RegExp(`^${esc}$`);
+        return re.test(o);
+      }
+      return false;
+    });
+  };
+
+  if (isAllowedOrigin(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin!);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      (req.headers["access-control-request-headers"] as string) || "Content-Type, Authorization",
+    );
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      (req.headers["access-control-request-method"] as string) || "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+    );
+  }
+
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+  next();
+});
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -53,7 +93,18 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    const shouldServeStatic = process.env.SERVE_STATIC === "true";
+    if (shouldServeStatic) {
+      try {
+        // only serve static if dist/public exists
+        const distPublic = new URL("./public", import.meta.url).pathname.replace(/\/server\/$/, "/server/");
+        if (fs.existsSync(new URL("./public", import.meta.url))) {
+          serveStatic(app);
+        }
+      } catch {
+        // ignore if not present
+      }
+    }
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
