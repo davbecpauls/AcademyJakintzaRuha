@@ -1,0 +1,1 @@
+module.exports = require('./workspaces/AcademyJakintzaRuha/netlify/functions/api.js')

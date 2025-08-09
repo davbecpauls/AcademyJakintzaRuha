@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Minimal CORS for Render backend; set CORS_ORIGIN to your Netlify URL (comma-separated allowed)
+// Minimal CORS for Netlify backend; set CORS_ORIGIN to your Netlify URL (comma-separated allowed)
 app.use((req, res, next) => {
   const allowed = (process.env.CORS_ORIGIN || "").split(/[,\s]+/).filter(Boolean);
   const origin = req.headers.origin as string | undefined;
