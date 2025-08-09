@@ -1,6 +1,9 @@
 [build]
-  command = "npm run build"
-  publish = "dist/public"
+  command = "vite build"
+  publish = "client/dist"
+
+[dev]
+  command = "vite"
 
 # API requests -> Render backend (must be before SPA fallback)
 [[redirects]]
